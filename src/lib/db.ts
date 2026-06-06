@@ -1,10 +1,14 @@
-import sqlite3 from 'sqlite3';
-import { open, Database } from 'sqlite';
+// Lazy import sqlite3 and sqlite inside getDb to avoid native module loading at build time
+// import sqlite3 from 'sqlite3';
 import path from 'path';
 
-let dbPromise: Promise<Database<sqlite3.Database, sqlite3.Statement>> | null = null;
+let dbPromise: Promise<any> | null = null;
 
 export async function getDb() {
+  // Dynamically import sqlite3 and sqlite only when needed (runtime)
+  const sqlite3 = (await import('sqlite3')).default;
+  const { open } = await import('sqlite');
+
   if (!dbPromise) {
     dbPromise = open({
       filename: path.join(process.cwd(), 'database.sqlite'),
